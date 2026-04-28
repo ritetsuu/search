@@ -8,30 +8,20 @@ async function runSearch() {
     const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`;
 
     const res = await fetch(url);
-    const data = await res.json();
 
-    let output = "";
+    console.log("Response status:", res.status);
 
-    // Instant answer
-    if (data.AbstractText) {
-      output += `<p><b>Answer:</b> ${data.AbstractText}</p>`;
-    }
+    const text = await res.text();
+    console.log("Raw response:", text);
 
-    // Related topics
-    if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-      output += "<ul>";
-      data.RelatedTopics.slice(0, 5).forEach(item => {
-        if (item.Text) {
-          output += `<li>${item.Text}</li>`;
-        }
-      });
-      output += "</ul>";
-    }
+    const data = JSON.parse(text);
 
-    resultsDiv.innerHTML = output || "No results found.";
+    resultsDiv.innerHTML = data.AbstractText
+      ? data.AbstractText
+      : "No results found.";
 
   } catch (err) {
-    resultsDiv.innerHTML = "Error fetching results.";
-    console.error(err);
+    console.error("FULL ERROR:", err);
+    resultsDiv.innerHTML = "Error: " + err.message;
   }
 }
